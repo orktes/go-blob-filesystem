@@ -26,6 +26,12 @@ func newBlobFileInfo(ctx context.Context, name string, bucket *blob.Bucket) (*bl
 		ctx:    ctx,
 	}
 
+	// root is always a directory
+	if name == "" || name == "/" {
+		bfi.isDir = true
+		return bfi, nil
+	}
+
 	attrs, err := bucket.Attributes(ctx, name)
 	if err != nil {
 		if gcerrors.Code(err) != gcerrors.NotFound {
