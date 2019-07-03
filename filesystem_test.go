@@ -255,6 +255,23 @@ func TestBlobFSFileSystemReaddir(t *testing.T) {
 		if files[0].IsDir() {
 			t.Error("bar should not be a dir")
 		}
+
+		files, err = file.Readdir(1)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if len(files) != 1 {
+			t.Error("wrong amount of files returned")
+		}
+
+		if files[0].Name() != "biz" {
+			t.Errorf("wrong file name returned, expected bar got %s", files[0].Name())
+		}
+
+		if !files[0].IsDir() {
+			t.Error("biz should be a dir")
+		}
 	})
 
 	t.Run("Readdir with limit larger than file count", func(t *testing.T) {
