@@ -13,6 +13,7 @@ type blobFile struct {
 	name   string
 	bucket *blob.Bucket
 	ctx    context.Context
+	config Config
 
 	fileInfo   *blobFileInfo
 	iter       *blob.ListIterator
@@ -69,6 +70,13 @@ func (bf *blobFile) Seek(offset int64, whence int) (int64, error) {
 }
 
 func (bf *blobFile) Readdir(count int) (files []os.FileInfo, err error) {
+	ctx := bf.ctx
+	if bf.config.RequestTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, bf.config.RequestTimeout)
+		defer cancel()
+	}
+
 	name := bf.name
 	if name != "" && !strings.HasSuffix(name, "/") {
 		name = bf.name + "/"
@@ -79,7 +87,7 @@ func (bf *blobFile) Readdir(count int) (files []os.FileInfo, err error) {
 	}
 
 	for {
-		obj, err := bf.iter.Next(bf.ctx)
+		obj, err := bf.iter.Next(ctx)
 		if err != nil {
 			if err == io.EOF && count <= 0 {
 				return files, nil
@@ -90,7 +98,6 @@ func (bf *blobFile) Readdir(count int) (files []os.FileInfo, err error) {
 		files = append(files, &blobFileInfo{
 			name:   obj.Key, // TODO this might not be the right name
 			bucket: bf.bucket,
-			ctx:    bf.ctx,
 
 			isDir: obj.IsDir,
 			attrs: &blob.Attributes{
@@ -113,7 +120,14 @@ func (bf *blobFile) Stat() (os.FileInfo, error) {
 		return bf.fileInfo, nil
 	}
 
-	fileInfo, err := newBlobFileInfo(bf.ctx, bf.name, bf.bucket)
+	ctx := bf.ctx
+	if bf.config.RequestTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, bf.config.RequestTimeout)
+		defer cancel()
+	}
+
+	fileInfo, err := getBlobFileInfo(ctx, bf.name, bf.bucket)
 
 	if err == nil {
 		bf.fileInfo = fileInfo

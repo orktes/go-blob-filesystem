@@ -11,6 +11,16 @@ import (
 type BlobFileSystem struct {
 	bucket *blob.Bucket
 	ctx    context.Context
+	config Config
+}
+
+// NewWithConfig returns a new BlobFileSystem for given bucket and config
+func NewWithConfig(bucket *blob.Bucket, config Config) *BlobFileSystem {
+	return &BlobFileSystem{
+		bucket: bucket,
+		ctx:    context.Background(),
+		config: config,
+	}
 }
 
 // New returns a new BlobFileSystem for given bucket
@@ -31,6 +41,7 @@ func (blobfs *BlobFileSystem) Open(name string) (http.File, error) {
 		name:   name,
 		bucket: blobfs.bucket,
 		ctx:    blobfs.ctx,
+		config: blobfs.config,
 	}
 	return f, nil
 }

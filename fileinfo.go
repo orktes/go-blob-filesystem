@@ -13,17 +13,14 @@ import (
 type blobFileInfo struct {
 	name   string
 	bucket *blob.Bucket
-	ctx    context.Context
 
 	isDir bool
 	attrs *blob.Attributes
 }
 
-func newBlobFileInfo(ctx context.Context, name string, bucket *blob.Bucket) (*blobFileInfo, error) {
+func getBlobFileInfo(ctx context.Context, name string, bucket *blob.Bucket) (*blobFileInfo, error) {
 	bfi := &blobFileInfo{
-		name:   name,
-		bucket: bucket,
-		ctx:    ctx,
+		name: name,
 	}
 
 	// root is always a directory
