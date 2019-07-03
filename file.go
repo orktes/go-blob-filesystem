@@ -95,6 +95,10 @@ func (bf *blobFile) Readdir(count int) (files []os.FileInfo, err error) {
 			return files, err
 		}
 
+		if obj.Key == name {
+			continue
+		}
+
 		files = append(files, &blobFileInfo{
 			name:   obj.Key, // TODO this might not be the right name
 			bucket: bf.bucket,
