@@ -13,7 +13,7 @@ type BlobFileSystem struct {
 	ctx    context.Context
 }
 
-// New returns a new GCSFileSystem for given bucket
+// New returns a new BlobFileSystem for given bucket
 func New(bucket *blob.Bucket) *BlobFileSystem {
 	return &BlobFileSystem{
 		bucket: bucket,
