@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net/http"
 
 	blobfs "github.com/orktes/go-blob-filesystem"
 
@@ -35,19 +35,12 @@ func main() {
 	}
 
 	// Create a *blob.Bucket.
-	bucket, err := gcsblob.OpenBucket(ctx, client, "some_bucket", nil)
+	bucket, err := gcsblob.OpenBucket(ctx, client, "some_gcs_bucket", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer bucket.Close()
 
-	// Create new blob fs
-	blob := blobfs.New(bucket)
-	file, err := blob.Open("/some_path")
-	fmt.Printf("%+v %+v\n", file, err)
-
-	files, err := file.Readdir(0)
-	for _, f := range files {
-		fmt.Printf("%s", f.Name())
-	}
+	// Create a web server
+	log.Fatal(http.ListenAndServe(":8080", http.FileServer(blobfs.New(bucket))))
 }
